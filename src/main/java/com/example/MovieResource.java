@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @Path("/movies")
-public class ExampleResource {
+public class MovieResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
