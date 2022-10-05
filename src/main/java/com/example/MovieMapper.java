@@ -2,6 +2,7 @@ package com.example;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "cdi")
 public interface MovieMapper {
@@ -12,4 +13,7 @@ public interface MovieMapper {
     //----- DTO to DAO
     @Mapping(target = "id",ignore = true)
     Movie toDAO(MovieDTO movieDTO);
+
+    @Mapping(target = "id",ignore = true)
+    Movie merge(@MappingTarget Movie target, Movie source);
 }
