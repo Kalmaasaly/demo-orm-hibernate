@@ -6,17 +6,20 @@ import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Path("/movies")
 public class MovieResource {
 
+    @Inject MovieMapper mapper;
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Counted(name = "get all movies",displayName = "getAllMovie",description = "fetch  all movies")
@@ -25,8 +28,11 @@ public class MovieResource {
             description = "fetch time of movie by Id",
             unit = MetricUnits.MILLISECONDS )
     public Response getAll() {
-        List<Movie> movieList=Movie.listAll();
-        return Response.ok(movieList).build();
+        List<MovieDTO> movieDTOList= Movie.listAll()
+                .stream()
+                .map(movie-> mapper.toDTO((Movie) movie))
+                .collect(Collectors.toList());
+        return Response.ok(movieDTOList).build();
     }
     @GET
     @Path("{id}")
@@ -38,7 +44,7 @@ public class MovieResource {
     unit = MetricUnits.MILLISECONDS)
     public Response getById(@PathParam("id") Long id) {
         var movieO=Movie.findByIdOptional(id);
-        return movieO.map(movie->Response.ok(movie).build())
+        return movieO.map(movie->Response.ok(mapper.toDTO((Movie) movie)).build())
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
 
     }
@@ -53,6 +59,9 @@ public class MovieResource {
             unit = MetricUnits.MILLISECONDS)
     public Response getByCountry(@PathParam("country") String country) {
         var movies=Movie.list("select u from Movie u where u.country=?1",country);
+        movies.stream()
+                .map(movie-> mapper.toDTO((Movie) movie))
+                .collect(Collectors.toList());
         return Response.ok(movies).build();
     }
 
@@ -66,7 +75,7 @@ public class MovieResource {
             unit = MetricUnits.MILLISECONDS)
     public Response getByTitle(@PathParam("title") String title) {
         var movieO=Movie.find("title",title).singleResultOptional();
-        return movieO.map(movie->Response.ok(movie).build())
+        return movieO.map(movie->Response.ok(mapper.toDTO((Movie) movie)).build())
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
 
     }
@@ -78,8 +87,10 @@ public class MovieResource {
             description = "insert a new movie into db",
             unit = MetricUnits.MILLISECONDS)
     @Timed(name = " created time of movie ",displayName = "timeCreatedMovie",description = "created time of movie by Id")
-    public Response create(Movie movie) {
+    public Response create(MovieDTO movieDTO) {
+      Movie movie=  mapper.toDAO(movieDTO);
        Movie.persist(movie);
+
        if (movie.isPersistent()){
            return Response.created(URI.create("/movies"+movie.id)).build();
        }else {

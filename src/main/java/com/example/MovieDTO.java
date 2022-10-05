@@ -1,20 +1,21 @@
 package com.example;
 
+public class MovieDTO {
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-
-@Entity
-public class Movie extends PanacheEntity{
-    @Column(length = 100)
+    private Long id;
     private String title;
-    @Column(length = 200)
     private String description;
-    private String director;
     private String country;
+    private String director;
+    private String promotion;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -32,19 +33,27 @@ public class Movie extends PanacheEntity{
         this.description = description;
     }
 
-    public String getDirector() {
-        return director;
-    }
-
-    public void setDirector(String director) {
-        this.director = director;
-    }
-
     public String getCountry() {
         return country;
     }
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getPromotion() {
+        return promotion;
+    }
+
+    public void setPromotion(String promotion) {
+        this.promotion = promotion;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
     }
 }
